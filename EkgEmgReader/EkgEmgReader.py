@@ -1,4 +1,7 @@
+import argparse
+
 import serial
+
 
 class ekg_packet:
     def __init__(self,num_channels=6,header_len=4):
@@ -44,8 +47,8 @@ class ekg_packet:
         else:
             self.read_error=False
             #Parse
-            for i in range(self.num_channels):
-                self.channel[i]=int.from_bytes(self.data[self.header_len+i:self.header_len+i+2],'big') #big endian
+            for i in range(0,self.num_channels*2,2):
+                self.channel[i//2]=int.from_bytes(self.data[self.header_len+i:self.header_len+i+2],'big') #big endian
             self.protocol_ver=self.data[2]
             self.packet_count=self.data[3]
         
@@ -80,18 +83,16 @@ class serial_ekg:
             pass
 
 if __name__=='__main__':
-    ekgSer=serial_ekg(port='/dev/ttyACM0',baudrate=57600,timeout=1)
+    parser=argparse.ArgumentParser(description='EKG/EMG data reader in real time')
+    parser.add_argument('-p','--port',type=str,required=True,metavar='',help='Serial port')
+    parser.add_argument('-b','--baud',type=int,required=True,metavar='',help='Baud rate')
+    args=parser.parse_args()
 
+    ekgSer=serial_ekg(port=args.port,baudrate=args.baud,timeout=1)
+    
     while True:
         ekgSer.read_packet()
-        #print(len(ekgSer.packet.data))
-        #print(ekgSer.packet.data)
+
         if not ekgSer.packet.read_error:
             print(ekgSer.packet.packet_count)
             print(ekgSer.packet.channel)
-
-
-
-
-    
-
