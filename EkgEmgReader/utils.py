@@ -1,3 +1,9 @@
+__author__ = "Ricard Lado"
+__copyright__ = "Copyright 2020, Lado"
+__credits__ = ["Ricard Lado"]
+__license__ = "GPLv3"
+
+
 class looping_list:
     '''
     List of fixed size that appends over the oldest element in the list.
