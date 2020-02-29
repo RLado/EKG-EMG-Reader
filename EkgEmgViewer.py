@@ -19,6 +19,7 @@ plt.style.use('seaborn-pastel')
 parser=argparse.ArgumentParser(description='Plot EKG/EMG data in real time')
 parser.add_argument('-p','--port',type=str,required=True,metavar='',help='Serial port')
 parser.add_argument('-b','--baud',type=int,required=True,metavar='',help='Baud rate')
+parser.add_argument('-ch','--channel',type=int,default=0,required=False,metavar='',help='Channel to be shown')
 parser.add_argument('-v','--verbose',type=bool,default=False,required=False,metavar='',help='Show packet count and channel data on the terminal')
 args=parser.parse_args()
 
@@ -36,7 +37,7 @@ if __name__=='__main__':
     y_q=multiprocessing.Queue(2)
 
     time_plot_data=utils.looping_list(512)
-    channel_1_plot_data=utils.looping_list(512)
+    channel_plot_data=utils.looping_list(512)
     
     plot_process=multiprocessing.Process(target=plot, args=(x_q,y_q))
     plot_process.start()
@@ -53,7 +54,7 @@ if __name__=='__main__':
                     print(ekgSer.packet.channel)
                 
                 time_plot_data.append(time.time()-tZero)
-                channel_1_plot_data.append(ekgSer.packet.channel[0])
+                channel_plot_data.append(ekgSer.packet.channel[args.channel])
 
                 try:
                     if x_q.full() or y_q.full():
@@ -63,7 +64,7 @@ if __name__=='__main__':
                     pass
                 try:
                     x_q.put_nowait(time_plot_data.list)
-                    y_q.put_nowait(channel_1_plot_data.list)
+                    y_q.put_nowait(channel_plot_data.list)
                 except queue.Full:
                     pass
 
